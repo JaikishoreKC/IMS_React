@@ -28,6 +28,112 @@ const initialFormData = {
   purchaseDate: "",
 };
 
+const baseInputClass =
+  "mt-2 w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-4 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400";
+
+const getInputClass = (hasError) =>
+  `${baseInputClass} ${
+    hasError
+      ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+      : "border-slate-200 focus:border-blue-500 focus:ring-blue-100"
+  }`;
+
+function SectionHeader({ icon: Icon, iconClassName, title, description }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div
+        className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconClassName}`}
+      >
+        <Icon size={20} />
+      </div>
+
+      <div>
+        <h2 className="font-semibold text-slate-900">{title}</h2>
+
+        <p className="text-sm text-slate-500">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+function FieldLabel({ htmlFor, label, required = false }) {
+  return (
+    <label htmlFor={htmlFor} className="text-sm font-medium text-slate-700">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+  );
+}
+
+function SelectField({
+  id,
+  name,
+  value,
+  label,
+  required,
+  options,
+  placeholder,
+  disabled,
+  onChange,
+  error,
+}) {
+  return (
+    <div>
+      <FieldLabel htmlFor={id} label={label} required={required} />
+
+      <select
+        id={id}
+        name={name}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        className={getInputClass(Boolean(error))}
+      >
+        <option value="">{placeholder}</option>
+
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+
+      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+    </div>
+  );
+}
+
+function TextField({
+  id,
+  name,
+  type,
+  value,
+  label,
+  placeholder,
+  required,
+  onChange,
+  error,
+  inputMode,
+}) {
+  return (
+    <div>
+      <FieldLabel htmlFor={id} label={label} required={required} />
+
+      <input
+        id={id}
+        name={name}
+        type={type}
+        inputMode={inputMode}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        className={getInputClass(Boolean(error))}
+      />
+
+      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+    </div>
+  );
+}
+
 function PurchaseEntry() {
   const navigate = useNavigate();
 
@@ -45,9 +151,6 @@ function PurchaseEntry() {
   const [apiError, setApiError] = useState("");
   const [errors, setErrors] = useState({});
 
-  /*
-   * Load vendors and material categories when the page opens.
-   */
   useEffect(() => {
     const loadInitialData = async () => {
       try {
@@ -76,9 +179,6 @@ function PurchaseEntry() {
     loadInitialData();
   }, []);
 
-  /*
-   * Load material types and units whenever the material category changes.
-   */
   useEffect(() => {
     const loadMaterialData = async () => {
       if (!formData.materialCategoryId) {
@@ -122,9 +222,6 @@ function PurchaseEntry() {
         [name]: value,
       };
 
-      /*
-       * Reset dependent fields when category changes.
-       */
       if (name === "materialCategoryId") {
         updatedData.materialTypeId = "";
         updatedData.unitId = "";
@@ -184,9 +281,6 @@ function PurchaseEntry() {
     return Object.keys(newErrors).length === 0;
   };
 
-  /*
-   * Submit purchase details to IMS backend.
-   */
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -221,9 +315,6 @@ function PurchaseEntry() {
     }
   };
 
-  /*
-   * Reset the complete form.
-   */
   const handleReset = () => {
     setFormData(initialFormData);
     setMaterialTypes([]);
@@ -232,19 +323,8 @@ function PurchaseEntry() {
     setApiError("");
   };
 
-  const inputClass =
-    "mt-2 w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-4 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400";
-
-  const getInputClass = (fieldName) =>
-    `${inputClass} ${
-      errors[fieldName]
-        ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-        : "border-slate-200 focus:border-blue-500 focus:ring-blue-100"
-    }`;
-
   return (
     <div className="mx-auto max-w-5xl">
-      {/* Page Header */}
       <div className="mb-8">
         <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
           Purchase Management
@@ -260,7 +340,6 @@ function PurchaseEntry() {
         </p>
       </div>
 
-      {/* API Error */}
       {apiError && (
         <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
           <AlertCircle size={20} className="mt-0.5 shrink-0" />
@@ -273,7 +352,6 @@ function PurchaseEntry() {
         </div>
       )}
 
-      {/* Initial Loading */}
       {loadingInitialData ? (
         <div className="flex min-h-100 flex-col items-center justify-center">
           <LoaderCircle size={32} className="animate-spin text-blue-600" />
@@ -284,308 +362,156 @@ function PurchaseEntry() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Vendor Information */}
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                <Building2 size={20} />
-              </div>
-
-              <div>
-                <h2 className="font-semibold text-slate-900">
-                  Vendor Information
-                </h2>
-
-                <p className="text-sm text-slate-500">
-                  Select the vendor for this purchase.
-                </p>
-              </div>
-            </div>
+            <SectionHeader
+              icon={Building2}
+              iconClassName="bg-blue-50 text-blue-600"
+              title="Vendor Information"
+              description="Select the vendor for this purchase."
+            />
 
             <div className="mt-6">
-              <label
-                htmlFor="vendorName"
-                className="text-sm font-medium text-slate-700"
-              >
-                Vendor Name <span className="text-red-500">*</span>
-              </label>
-
-              <select
+              <SelectField
                 id="vendorName"
                 name="vendorName"
                 value={formData.vendorName}
+                label="Vendor Name"
+                required
+                placeholder="Select vendor"
+                options={vendors.map((vendor) => ({
+                  value: vendor.vendorName,
+                  label: vendor.vendorName,
+                }))}
                 onChange={handleChange}
-                className={getInputClass("vendorName")}
-              >
-                <option value="">Select vendor</option>
-
-                {vendors.map((vendor) => (
-                  <option key={vendor.vendorId} value={vendor.vendorName}>
-                    {vendor.vendorName}
-                  </option>
-                ))}
-              </select>
-
-              {errors.vendorName && (
-                <p className="mt-2 text-sm text-red-600">{errors.vendorName}</p>
-              )}
+                error={errors.vendorName}
+              />
             </div>
           </section>
 
-          {/* Material Information */}
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                <Boxes size={20} />
-              </div>
-
-              <div>
-                <h2 className="font-semibold text-slate-900">
-                  Material Information
-                </h2>
-
-                <p className="text-sm text-slate-500">
-                  Select the material category, type, and unit.
-                </p>
-              </div>
-            </div>
+            <SectionHeader
+              icon={Boxes}
+              iconClassName="bg-indigo-50 text-indigo-600"
+              title="Material Information"
+              description="Select the material category, type, and unit."
+            />
 
             <div className="mt-6 grid gap-5 md:grid-cols-2">
-              {/* Material Category */}
-              <div>
-                <label
-                  htmlFor="materialCategoryId"
-                  className="text-sm font-medium text-slate-700"
-                >
-                  Material Category <span className="text-red-500">*</span>
-                </label>
+              <SelectField
+                id="materialCategoryId"
+                name="materialCategoryId"
+                value={formData.materialCategoryId}
+                label="Material Category"
+                required
+                placeholder="Select material category"
+                options={categories.map((category) => ({
+                  value: category.categoryId,
+                  label: category.categoryName,
+                }))}
+                onChange={handleChange}
+                error={errors.materialCategoryId}
+              />
 
-                <select
-                  id="materialCategoryId"
-                  name="materialCategoryId"
-                  value={formData.materialCategoryId}
-                  onChange={handleChange}
-                  className={getInputClass("materialCategoryId")}
-                >
-                  <option value="">Select material category</option>
+              <SelectField
+                id="materialTypeId"
+                name="materialTypeId"
+                value={formData.materialTypeId}
+                label="Material Type"
+                required
+                placeholder={
+                  loadingMaterialData
+                    ? "Loading material types..."
+                    : "Select material type"
+                }
+                disabled={!formData.materialCategoryId || loadingMaterialData}
+                options={materialTypes.map((materialType) => ({
+                  value: materialType.typeId,
+                  label: materialType.typeName,
+                }))}
+                onChange={handleChange}
+                error={errors.materialTypeId}
+              />
 
-                  {categories.map((category) => (
-                    <option
-                      key={category.categoryId}
-                      value={category.categoryId}
-                    >
-                      {category.categoryName}
-                    </option>
-                  ))}
-                </select>
-
-                {errors.materialCategoryId && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {errors.materialCategoryId}
-                  </p>
-                )}
-              </div>
-
-              {/* Material Type */}
-              <div>
-                <label
-                  htmlFor="materialTypeId"
-                  className="text-sm font-medium text-slate-700"
-                >
-                  Material Type <span className="text-red-500">*</span>
-                </label>
-
-                <select
-                  id="materialTypeId"
-                  name="materialTypeId"
-                  value={formData.materialTypeId}
-                  onChange={handleChange}
-                  disabled={!formData.materialCategoryId || loadingMaterialData}
-                  className={getInputClass("materialTypeId")}
-                >
-                  <option value="">
-                    {loadingMaterialData
-                      ? "Loading material types..."
-                      : "Select material type"}
-                  </option>
-
-                  {materialTypes.map((materialType) => (
-                    <option
-                      key={materialType.typeId}
-                      value={materialType.typeId}
-                    >
-                      {materialType.typeName}
-                    </option>
-                  ))}
-                </select>
-
-                {errors.materialTypeId && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {errors.materialTypeId}
-                  </p>
-                )}
-              </div>
-
-              {/* Unit */}
-              <div>
-                <label
-                  htmlFor="unitId"
-                  className="text-sm font-medium text-slate-700"
-                >
-                  Unit <span className="text-red-500">*</span>
-                </label>
-
-                <select
-                  id="unitId"
-                  name="unitId"
-                  value={formData.unitId}
-                  onChange={handleChange}
-                  disabled={!formData.materialCategoryId || loadingMaterialData}
-                  className={getInputClass("unitId")}
-                >
-                  <option value="">
-                    {loadingMaterialData ? "Loading units..." : "Select unit"}
-                  </option>
-
-                  {units.map((unit) => (
-                    <option key={unit.unitId} value={unit.unitId}>
-                      {unit.unitName}
-                    </option>
-                  ))}
-                </select>
-
-                {errors.unitId && (
-                  <p className="mt-2 text-sm text-red-600">{errors.unitId}</p>
-                )}
-              </div>
+              <SelectField
+                id="unitId"
+                name="unitId"
+                value={formData.unitId}
+                label="Unit"
+                required
+                placeholder={
+                  loadingMaterialData ? "Loading units..." : "Select unit"
+                }
+                disabled={!formData.materialCategoryId || loadingMaterialData}
+                options={units.map((unit) => ({
+                  value: unit.unitId,
+                  label: unit.unitName,
+                }))}
+                onChange={handleChange}
+                error={errors.unitId}
+              />
             </div>
           </section>
 
-          {/* Purchase Details */}
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                <ClipboardList size={20} />
-              </div>
-
-              <div>
-                <h2 className="font-semibold text-slate-900">
-                  Purchase Details
-                </h2>
-
-                <p className="text-sm text-slate-500">
-                  Enter the details of the material purchase.
-                </p>
-              </div>
-            </div>
+            <SectionHeader
+              icon={ClipboardList}
+              iconClassName="bg-emerald-50 text-emerald-600"
+              title="Purchase Details"
+              description="Enter the details of the material purchase."
+            />
 
             <div className="mt-6 grid gap-5 md:grid-cols-2">
-              {/* Brand Name */}
-              <div>
-                <label
-                  htmlFor="brandName"
-                  className="text-sm font-medium text-slate-700"
-                >
-                  Brand Name <span className="text-red-500">*</span>
-                </label>
+              <TextField
+                id="brandName"
+                name="brandName"
+                type="text"
+                value={formData.brandName}
+                label="Brand Name"
+                placeholder="Enter brand name"
+                required
+                onChange={handleChange}
+                error={errors.brandName}
+              />
 
-                <input
-                  id="brandName"
-                  name="brandName"
-                  type="text"
-                  placeholder="Enter brand name"
-                  value={formData.brandName}
-                  onChange={handleChange}
-                  className={getInputClass("brandName")}
-                />
+              <TextField
+                id="quantity"
+                name="quantity"
+                type="text"
+                inputMode="numeric"
+                value={formData.quantity}
+                label="Quantity"
+                placeholder="Enter quantity"
+                required
+                onChange={handleChange}
+                error={errors.quantity}
+              />
 
-                {errors.brandName && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {errors.brandName}
-                  </p>
-                )}
-              </div>
+              <TextField
+                id="purchaseAmount"
+                name="purchaseAmount"
+                type="text"
+                inputMode="decimal"
+                value={formData.purchaseAmount}
+                label="Purchase Amount"
+                placeholder="Enter purchase amount"
+                required
+                onChange={handleChange}
+                error={errors.purchaseAmount}
+              />
 
-              {/* Quantity */}
-              <div>
-                <label
-                  htmlFor="quantity"
-                  className="text-sm font-medium text-slate-700"
-                >
-                  Quantity <span className="text-red-500">*</span>
-                </label>
-
-                <input
-                  id="quantity"
-                  name="quantity"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="Enter quantity"
-                  value={formData.quantity}
-                  onChange={handleChange}
-                  className={getInputClass("quantity")}
-                />
-
-                {errors.quantity && (
-                  <p className="mt-2 text-sm text-red-600">{errors.quantity}</p>
-                )}
-              </div>
-
-              {/* Purchase Amount */}
-              <div>
-                <label
-                  htmlFor="purchaseAmount"
-                  className="text-sm font-medium text-slate-700"
-                >
-                  Purchase Amount <span className="text-red-500">*</span>
-                </label>
-
-                <input
-                  id="purchaseAmount"
-                  name="purchaseAmount"
-                  type="text"
-                  inputMode="decimal"
-                  placeholder="Enter purchase amount"
-                  value={formData.purchaseAmount}
-                  onChange={handleChange}
-                  className={getInputClass("purchaseAmount")}
-                />
-
-                {errors.purchaseAmount && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {errors.purchaseAmount}
-                  </p>
-                )}
-              </div>
-
-              {/* Purchase Date */}
-              <div>
-                <label
-                  htmlFor="purchaseDate"
-                  className="text-sm font-medium text-slate-700"
-                >
-                  Purchase Date <span className="text-red-500">*</span>
-                </label>
-
-                <input
-                  id="purchaseDate"
-                  name="purchaseDate"
-                  type="date"
-                  value={formData.purchaseDate}
-                  onChange={handleChange}
-                  className={getInputClass("purchaseDate")}
-                />
-
-                {errors.purchaseDate && (
-                  <p className="mt-2 text-sm text-red-600">
-                    {errors.purchaseDate}
-                  </p>
-                )}
-              </div>
+              <TextField
+                id="purchaseDate"
+                name="purchaseDate"
+                type="date"
+                value={formData.purchaseDate}
+                label="Purchase Date"
+                required
+                onChange={handleChange}
+                error={errors.purchaseDate}
+              />
             </div>
           </section>
 
-          {/* Action Buttons */}
           <div className="flex flex-col-reverse justify-end gap-3 border-t border-slate-200 pt-6 sm:flex-row">
             <button
               type="button"

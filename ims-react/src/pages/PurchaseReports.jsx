@@ -19,6 +19,70 @@ const initialFilters = {
   toDate: "",
 };
 
+function SectionHeader({ icon: Icon, title, description, iconClassName }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div
+        className={`flex h-10 w-10 items-center justify-center rounded-xl ${iconClassName}`}
+      >
+        <Icon size={20} />
+      </div>
+
+      <div>
+        <h2 className="font-semibold text-slate-900">{title}</h2>
+
+        <p className="text-sm text-slate-500">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+function VendorInfoItem({ label, value }) {
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
+        {label}
+      </p>
+      <p className="mt-1 text-sm text-slate-700">{value || "-"}</p>
+    </div>
+  );
+}
+
+function StatusBadge({ status }) {
+  const tone =
+    status === "SUCCESS"
+      ? "bg-emerald-50 text-emerald-700"
+      : status === "Pending"
+        ? "bg-amber-50 text-amber-700"
+        : "bg-slate-100 text-slate-700";
+
+  return (
+    <span
+      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${tone}`}
+    >
+      {status || "-"}
+    </span>
+  );
+}
+
+function EmptyState({ icon: Icon, title, description, iconClassName }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
+      <div
+        className={`mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${iconClassName}`}
+      >
+        <Icon size={30} />
+      </div>
+
+      <h3 className="mt-5 text-lg font-semibold text-slate-900">{title}</h3>
+
+      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+        {description}
+      </p>
+    </div>
+  );
+}
+
 function PurchaseReports() {
   const [filters, setFilters] = useState(initialFilters);
 
@@ -173,7 +237,6 @@ function PurchaseReports() {
 
   return (
     <div className="mx-auto max-w-7xl">
-      {/* Page Header */}
       <div className="mb-8">
         <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
           Reporting & Analytics
@@ -188,7 +251,6 @@ function PurchaseReports() {
         </p>
       </div>
 
-      {/* Error Message */}
       {(apiError || validationError) && (
         <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
           <AlertCircle size={20} className="mt-0.5 shrink-0" />
@@ -205,27 +267,18 @@ function PurchaseReports() {
         </div>
       )}
 
-      {/* Report Filters */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-            <Search size={20} />
-          </div>
-
-          <div>
-            <h2 className="font-semibold text-slate-900">Report Filters</h2>
-
-            <p className="text-sm text-slate-500">
-              Select a vendor and date range to generate the report.
-            </p>
-          </div>
-        </div>
+        <SectionHeader
+          icon={Search}
+          title="Report Filters"
+          description="Select a vendor and date range to generate the report."
+          iconClassName="bg-blue-50 text-blue-600"
+        />
 
         <form
           onSubmit={handleGenerateReport}
           className="mt-6 grid gap-5 lg:grid-cols-3"
         >
-          {/* Vendor */}
           <div>
             <label
               htmlFor="vendorName"
@@ -255,7 +308,6 @@ function PurchaseReports() {
             </select>
           </div>
 
-          {/* From Date */}
           <div>
             <label
               htmlFor="fromDate"
@@ -275,7 +327,6 @@ function PurchaseReports() {
             />
           </div>
 
-          {/* To Date */}
           <div>
             <label
               htmlFor="toDate"
@@ -295,8 +346,7 @@ function PurchaseReports() {
             />
           </div>
 
-          {/* Buttons */}
-          <div className="flex flex-col-reverse gap-3 lg:col-span-3 sm:flex-row sm:justify-end">
+          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end lg:col-span-3">
             <button
               type="button"
               onClick={handleReset}
@@ -331,37 +381,22 @@ function PurchaseReports() {
       {selectedVendor && (
         <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60">
           <div className="grid gap-5 sm:grid-cols-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
-                Address
-              </p>
-              <p className="mt-1 text-sm text-slate-700">
-                {selectedVendor.vendorAddress || "-"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
-                Contact Number
-              </p>
-              <p className="mt-1 text-sm text-slate-700">
-                {selectedVendor.contactNumber || "-"}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
-                Contact Person
-              </p>
-              <p className="mt-1 text-sm text-slate-700">
-                {selectedVendor.contactPerson || "-"}
-              </p>
-            </div>
+            <VendorInfoItem
+              label="Address"
+              value={selectedVendor.vendorAddress}
+            />
+            <VendorInfoItem
+              label="Contact Number"
+              value={selectedVendor.contactNumber}
+            />
+            <VendorInfoItem
+              label="Contact Person"
+              value={selectedVendor.contactPerson}
+            />
           </div>
         </section>
       )}
 
-      {/* Report Results */}
       <section className="mt-8">
         <div className="mb-5">
           <h2 className="text-xl font-bold text-slate-900">Purchase History</h2>
@@ -371,25 +406,15 @@ function PurchaseReports() {
           </p>
         </div>
 
-        {/* Initial State */}
         {!reportGenerated && !loadingReport && (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-              <BarChart3 size={30} />
-            </div>
-
-            <h3 className="mt-5 text-lg font-semibold text-slate-900">
-              No Report Generated Yet
-            </h3>
-
-            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-              Select a vendor and date range, then generate a report to view
-              purchase transactions.
-            </p>
-          </div>
+          <EmptyState
+            icon={BarChart3}
+            title="No Report Generated Yet"
+            description="Select a vendor and date range, then generate a report to view purchase transactions."
+            iconClassName="bg-blue-50 text-blue-600"
+          />
         )}
 
-        {/* Loading State */}
         {loadingReport && (
           <div className="flex min-h-[250px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white">
             <LoaderCircle size={32} className="animate-spin text-blue-600" />
@@ -400,28 +425,18 @@ function PurchaseReports() {
           </div>
         )}
 
-        {/* No Records */}
         {reportGenerated &&
           !loadingReport &&
           !apiError &&
           reportData.length === 0 && (
-            <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
-                <FileX size={30} />
-              </div>
-
-              <h3 className="mt-5 text-lg font-semibold text-slate-900">
-                No Records Found
-              </h3>
-
-              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-                No purchase records were found for the selected vendor and date
-                range.
-              </p>
-            </div>
+            <EmptyState
+              icon={FileX}
+              title="No Records Found"
+              description="No purchase records were found for the selected vendor and date range."
+              iconClassName="bg-slate-100 text-slate-500"
+            />
           )}
 
-        {/* Report Table */}
         {reportGenerated &&
           !loadingReport &&
           !apiError &&
@@ -521,17 +536,7 @@ function PurchaseReports() {
                         </td>
 
                         <td className="px-5 py-4">
-                          <span
-                            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                              purchase.status === "SUCCESS"
-                                ? "bg-emerald-50 text-emerald-700"
-                                : purchase.status === "Pending"
-                                  ? "bg-amber-50 text-amber-700"
-                                  : "bg-slate-100 text-slate-700"
-                            }`}
-                          >
-                            {purchase.status || "-"}
-                          </span>
+                          <StatusBadge status={purchase.status} />
                         </td>
                       </tr>
                     ))}
