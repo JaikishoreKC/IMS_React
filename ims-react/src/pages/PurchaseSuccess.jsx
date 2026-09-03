@@ -8,22 +8,22 @@ function PurchaseSuccess() {
   if (!purchase) {
     return (
       <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center">
-        <div className="w-full max-w-xl rounded-3xl border border-white/10 bg-[#0d1427] p-8 text-center shadow-2xl sm:p-12">
+        <div className="w-full max-w-xl rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-xl shadow-slate-200/70 sm:p-12">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-amber-400/10 text-amber-300">
             <FileBarChart size={38} />
           </div>
           <p className="mt-7 text-xs font-bold uppercase tracking-[0.2em] text-amber-300">
             No purchase result
           </p>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900">
             Purchase details are unavailable
           </h1>
-          <p className="mx-auto mt-4 max-w-md leading-7 text-slate-400">
+          <p className="mx-auto mt-4 max-w-md leading-7 text-slate-600">
             This page is available after a purchase is submitted successfully.
           </p>
           <Link
             to="/purchase"
-            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-blue-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-400"
+            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-700"
           >
             <ClipboardPlus size={17} />
             Go to purchase entry
@@ -35,7 +35,7 @@ function PurchaseSuccess() {
 
   return (
     <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center">
-      <div className="w-full max-w-xl rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm sm:p-12">
+      <div className="w-full max-w-xl rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-xl shadow-slate-200/70 sm:p-12">
         {/* Success Icon */}
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
           <CheckCircle2 size={42} strokeWidth={2.2} />
@@ -50,7 +50,7 @@ function PurchaseSuccess() {
           Purchase Added Successfully
         </h1>
 
-        <p className="mx-auto mt-4 max-w-md leading-7 text-slate-500">
+        <p className="mx-auto mt-4 max-w-md leading-7 text-slate-600">
           The purchase details have been successfully recorded in the Inventory
           Management System.
         </p>
@@ -79,7 +79,7 @@ function PurchaseSuccess() {
               <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                 Vendor
               </dt>
-              <dd className="mt-1 text-slate-900">
+              <dd className="mt-1 text-slate-700">
                 {purchase.vendorName || "-"}
               </dd>
             </div>
@@ -88,7 +88,7 @@ function PurchaseSuccess() {
               <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                 Purchase Amount
               </dt>
-              <dd className="mt-1 text-slate-900">
+              <dd className="mt-1 text-slate-700">
                 {purchase.purchaseAmount ?? "-"}
               </dd>
             </div>
@@ -97,7 +97,7 @@ function PurchaseSuccess() {
               <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                 Purchase Date
               </dt>
-              <dd className="mt-1 text-slate-900">
+              <dd className="mt-1 text-slate-700">
                 {purchase.purchaseDate || "-"}
               </dd>
             </div>
@@ -106,7 +106,7 @@ function PurchaseSuccess() {
               <dt className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                 Status
               </dt>
-              <dd className="mt-1 text-slate-900">{purchase.status || "-"}</dd>
+              <dd className="mt-1 text-slate-700">{purchase.status || "-"}</dd>
             </div>
           </dl>
         )}
@@ -115,7 +115,7 @@ function PurchaseSuccess() {
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Link
             to="/purchase"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700"
           >
             <ClipboardPlus size={17} />
             Add Another Purchase

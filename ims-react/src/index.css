@@ -2,8 +2,8 @@
 
 :root {
   font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-  color: #e8edf7;
-  background: #070b17;
+  color: #1f2937;
+  background: #f4f7fb;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
@@ -21,9 +21,7 @@ body,
 
 body {
   min-width: 320px;
-  background:
-    radial-gradient(circle at 15% 0%, rgba(61, 91, 190, 0.2), transparent 30rem),
-    linear-gradient(135deg, #070b17 0%, #0b1021 54%, #11102a 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #eef4fb 100%);
 }
 
 button,
