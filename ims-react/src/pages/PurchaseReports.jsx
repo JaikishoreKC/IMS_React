@@ -6,11 +6,11 @@ import {
   Search,
   Building2,
   LoaderCircle,
-  AlertCircle,
   FileX,
   ReceiptText,
 } from "lucide-react";
 
+import ErrorPopup from "../components/ErrorPopup";
 import { getVendors, getPurchaseReport } from "../services/purchaseService";
 
 const initialFilters = {
@@ -18,6 +18,12 @@ const initialFilters = {
   fromDate: "",
   toDate: "",
 };
+
+const formatError = (fieldName, message) => (
+  <>
+    <b>"{fieldName}"</b> {message}
+  </>
+);
 
 function SectionHeader({ icon: Icon, title, description, iconClassName }) {
   return (
@@ -30,7 +36,6 @@ function SectionHeader({ icon: Icon, title, description, iconClassName }) {
 
       <div>
         <h2 className="font-semibold text-slate-900">{title}</h2>
-
         <p className="text-sm text-slate-500">{description}</p>
       </div>
     </div>
@@ -92,16 +97,19 @@ function PurchaseReports() {
   const [loadingVendors, setLoadingVendors] = useState(true);
   const [loadingReport, setLoadingReport] = useState(false);
 
-  const [apiError, setApiError] = useState("");
-  const [validationError, setValidationError] = useState("");
+  const [errorPopup, setErrorPopup] = useState(null);
+  const [reportFailed, setReportFailed] = useState(false);
 
   const [reportGenerated, setReportGenerated] = useState(false);
+
+  const showError = (message) => {
+    setErrorPopup(message);
+  };
 
   useEffect(() => {
     const loadVendors = async () => {
       try {
         setLoadingVendors(true);
-        setApiError("");
 
         const vendorData = await getVendors();
 
@@ -109,7 +117,7 @@ function PurchaseReports() {
       } catch (error) {
         console.error("Failed to load vendors:", error);
 
-        setApiError(
+        showError(
           error.response?.data?.message ||
             "Unable to load vendors. Please ensure the IMS backend is running.",
         );
@@ -128,29 +136,30 @@ function PurchaseReports() {
       ...previousFilters,
       [name]: value,
     }));
-
-    setValidationError("");
-    setApiError("");
   };
 
   const validateFilters = () => {
     if (!filters.vendorName) {
-      setValidationError("Please select a vendor.");
+      showError(formatError("Vendor Name", "is a required field."));
       return false;
     }
 
     if (!filters.fromDate) {
-      setValidationError("Please select a From Date.");
+      showError(formatError("From Date", "is a required field."));
       return false;
     }
 
     if (!filters.toDate) {
-      setValidationError("Please select a To Date.");
+      showError(formatError("To Date", "is a required field."));
       return false;
     }
 
     if (new Date(filters.fromDate) > new Date(filters.toDate)) {
-      setValidationError("From Date cannot be later than To Date.");
+      showError(
+        <>
+          <b>"From Date"</b> cannot be later than <b>"To Date"</b>.
+        </>,
+      );
       return false;
     }
 
@@ -160,8 +169,8 @@ function PurchaseReports() {
   const handleGenerateReport = async (event) => {
     event.preventDefault();
 
-    setValidationError("");
-    setApiError("");
+    setErrorPopup(null);
+    setReportFailed(false);
 
     if (!validateFilters()) {
       return;
@@ -175,17 +184,18 @@ function PurchaseReports() {
 
       setReportData(response || []);
       setReportGenerated(true);
+      setReportFailed(false);
     } catch (error) {
       console.error("Failed to generate purchase report:", error);
 
       setReportData([]);
+      setReportGenerated(true);
+      setReportFailed(true);
 
-      setApiError(
+      showError(
         error.response?.data?.message ||
           "Unable to load the purchase report. Please try again.",
       );
-
-      setReportGenerated(true);
     } finally {
       setLoadingReport(false);
     }
@@ -195,8 +205,8 @@ function PurchaseReports() {
     setFilters(initialFilters);
     setReportData([]);
     setReportGenerated(false);
-    setValidationError("");
-    setApiError("");
+    setReportFailed(false);
+    setErrorPopup(null);
   };
 
   const selectedVendor = vendors.find(
@@ -236,317 +246,311 @@ function PurchaseReports() {
     "mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400";
 
   return (
-    <div className="mx-auto max-w-7xl">
-      <div className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
-          Reporting & Analytics
-        </p>
+    <>
+      <ErrorPopup message={errorPopup} onClose={() => setErrorPopup(null)} />
 
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
-          Purchase Reports
-        </h1>
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-8">
+          <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
+            Reporting & Analytics
+          </p>
 
-        <p className="mt-2 text-slate-600">
-          View purchase transactions by vendor and selected date range.
-        </p>
-      </div>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
+            Purchase Reports
+          </h1>
 
-      {(apiError || validationError) && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
-          <AlertCircle size={20} className="mt-0.5 shrink-0" />
-
-          <div>
-            <p className="font-semibold">
-              {validationError
-                ? "Please check the report filters"
-                : "Unable to generate report"}
-            </p>
-
-            <p className="mt-1 text-sm">{validationError || apiError}</p>
-          </div>
-        </div>
-      )}
-
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60">
-        <SectionHeader
-          icon={Search}
-          title="Report Filters"
-          description="Select a vendor and date range to generate the report."
-          iconClassName="bg-blue-50 text-blue-600"
-        />
-
-        <form
-          onSubmit={handleGenerateReport}
-          className="mt-6 grid gap-5 lg:grid-cols-3"
-        >
-          <div>
-            <label
-              htmlFor="vendorName"
-              className="flex items-center gap-2 text-sm font-medium text-slate-700"
-            >
-              <Building2 size={16} />
-              Vendor Name
-            </label>
-
-            <select
-              id="vendorName"
-              name="vendorName"
-              value={filters.vendorName}
-              onChange={handleChange}
-              disabled={loadingVendors}
-              className={inputClass}
-            >
-              <option value="">
-                {loadingVendors ? "Loading vendors..." : "Select vendor"}
-              </option>
-
-              {vendors.map((vendor) => (
-                <option key={vendor.vendorId} value={vendor.vendorName}>
-                  {vendor.vendorName}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              htmlFor="fromDate"
-              className="flex items-center gap-2 text-sm font-medium text-slate-700"
-            >
-              <CalendarDays size={16} />
-              From Date
-            </label>
-
-            <input
-              id="fromDate"
-              name="fromDate"
-              type="date"
-              value={filters.fromDate}
-              onChange={handleChange}
-              className={inputClass}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="toDate"
-              className="flex items-center gap-2 text-sm font-medium text-slate-700"
-            >
-              <CalendarDays size={16} />
-              To Date
-            </label>
-
-            <input
-              id="toDate"
-              name="toDate"
-              type="date"
-              value={filters.toDate}
-              onChange={handleChange}
-              className={inputClass}
-            />
-          </div>
-
-          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end lg:col-span-3">
-            <button
-              type="button"
-              onClick={handleReset}
-              disabled={loadingReport}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <RotateCcw size={17} />
-              Reset
-            </button>
-
-            <button
-              type="submit"
-              disabled={loadingReport || loadingVendors}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {loadingReport ? (
-                <>
-                  <LoaderCircle size={17} className="animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <BarChart3 size={17} />
-                  Generate Report
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </section>
-
-      {selectedVendor && (
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60">
-          <div className="grid gap-5 sm:grid-cols-3">
-            <VendorInfoItem
-              label="Address"
-              value={selectedVendor.vendorAddress}
-            />
-            <VendorInfoItem
-              label="Contact Number"
-              value={selectedVendor.contactNumber}
-            />
-            <VendorInfoItem
-              label="Contact Person"
-              value={selectedVendor.contactPerson}
-            />
-          </div>
-        </section>
-      )}
-
-      <section className="mt-8">
-        <div className="mb-5">
-          <h2 className="text-xl font-bold text-slate-900">Purchase History</h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Purchase records matching the selected report criteria.
+          <p className="mt-2 text-slate-600">
+            View purchase transactions by vendor and selected date range.
           </p>
         </div>
 
-        {!reportGenerated && !loadingReport && (
-          <EmptyState
-            icon={BarChart3}
-            title="No Report Generated Yet"
-            description="Select a vendor and date range, then generate a report to view purchase transactions."
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60">
+          <SectionHeader
+            icon={Search}
+            title="Report Filters"
+            description="Select a vendor and date range to generate the report."
             iconClassName="bg-blue-50 text-blue-600"
           />
+
+          <form
+            onSubmit={handleGenerateReport}
+            className="mt-6 grid gap-5 lg:grid-cols-3"
+          >
+            <div>
+              <label
+                htmlFor="vendorName"
+                className="flex items-center gap-2 text-sm font-medium text-slate-700"
+              >
+                <Building2 size={16} />
+                Vendor Name
+              </label>
+
+              <select
+                id="vendorName"
+                name="vendorName"
+                value={filters.vendorName}
+                onChange={handleChange}
+                disabled={loadingVendors}
+                className={inputClass}
+              >
+                <option value="">
+                  {loadingVendors ? "Loading vendors..." : "Select vendor"}
+                </option>
+
+                {vendors.map((vendor) => (
+                  <option key={vendor.vendorId} value={vendor.vendorName}>
+                    {vendor.vendorName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="fromDate"
+                className="flex items-center gap-2 text-sm font-medium text-slate-700"
+              >
+                <CalendarDays size={16} />
+                From Date
+              </label>
+
+              <input
+                id="fromDate"
+                name="fromDate"
+                type="date"
+                value={filters.fromDate}
+                onChange={handleChange}
+                className={inputClass}
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="toDate"
+                className="flex items-center gap-2 text-sm font-medium text-slate-700"
+              >
+                <CalendarDays size={16} />
+                To Date
+              </label>
+
+              <input
+                id="toDate"
+                name="toDate"
+                type="date"
+                value={filters.toDate}
+                onChange={handleChange}
+                className={inputClass}
+              />
+            </div>
+
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end lg:col-span-3">
+              <button
+                type="button"
+                onClick={handleReset}
+                disabled={loadingReport}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <RotateCcw size={17} />
+                Reset
+              </button>
+
+              <button
+                type="submit"
+                disabled={loadingReport || loadingVendors}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {loadingReport ? (
+                  <>
+                    <LoaderCircle size={17} className="animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <BarChart3 size={17} />
+                    Generate Report
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </section>
+
+        {selectedVendor && (
+          <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60">
+            <div className="grid gap-5 sm:grid-cols-3">
+              <VendorInfoItem
+                label="Address"
+                value={selectedVendor.vendorAddress}
+              />
+
+              <VendorInfoItem
+                label="Contact Number"
+                value={selectedVendor.contactNumber}
+              />
+
+              <VendorInfoItem
+                label="Contact Person"
+                value={selectedVendor.contactPerson}
+              />
+            </div>
+          </section>
         )}
 
-        {loadingReport && (
-          <div className="flex min-h-[250px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white">
-            <LoaderCircle size={32} className="animate-spin text-blue-600" />
+        <section className="mt-8">
+          <div className="mb-5">
+            <h2 className="text-xl font-bold text-slate-900">
+              Purchase History
+            </h2>
 
-            <p className="mt-4 text-sm text-slate-500">
-              Generating purchase report...
+            <p className="mt-1 text-sm text-slate-500">
+              Purchase records matching the selected report criteria.
             </p>
           </div>
-        )}
 
-        {reportGenerated &&
-          !loadingReport &&
-          !apiError &&
-          reportData.length === 0 && (
+          {!reportGenerated && !loadingReport && (
             <EmptyState
-              icon={FileX}
-              title="No Records Found"
-              description="No purchase records were found for the selected vendor and date range."
-              iconClassName="bg-slate-100 text-slate-500"
+              icon={BarChart3}
+              title="No Report Generated Yet"
+              description="Select a vendor and date range, then generate a report to view purchase transactions."
+              iconClassName="bg-blue-50 text-blue-600"
             />
           )}
 
-        {reportGenerated &&
-          !loadingReport &&
-          !apiError &&
-          reportData.length > 0 && (
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-slate-200/60">
-              <div className="flex flex-col gap-3 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                    <ReceiptText size={20} />
-                  </div>
+          {loadingReport && (
+            <div className="flex min-h-[250px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white">
+              <LoaderCircle size={32} className="animate-spin text-blue-600" />
 
-                  <div>
-                    <p className="font-semibold text-slate-900">
-                      Report Results
-                    </p>
-
-                    <p className="text-sm text-slate-500">
-                      {reportData.length} purchase record
-                      {reportData.length !== 1 ? "s" : ""} found
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[850px] text-left">
-                  <thead className="border-b border-slate-200 bg-slate-50">
-                    <tr>
-                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Purchase ID
-                      </th>
-
-                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Transaction ID
-                      </th>
-
-                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Vendor
-                      </th>
-
-                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Brand
-                      </th>
-
-                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Quantity
-                      </th>
-
-                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Amount
-                      </th>
-
-                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Purchase Date
-                      </th>
-
-                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody className="divide-y divide-slate-100">
-                    {reportData.map((purchase, index) => (
-                      <tr
-                        key={
-                          purchase.purchaseId || purchase.transactionId || index
-                        }
-                        className="transition hover:bg-slate-50"
-                      >
-                        <td className="px-5 py-4 text-sm font-medium text-slate-900">
-                          {purchase.purchaseId ?? "-"}
-                        </td>
-
-                        <td className="px-5 py-4 text-sm text-slate-600">
-                          {purchase.transactionId || "-"}
-                        </td>
-
-                        <td className="px-5 py-4 text-sm text-slate-700">
-                          {purchase.vendorName || "-"}
-                        </td>
-
-                        <td className="px-5 py-4 text-sm text-slate-700">
-                          {purchase.brandName || "-"}
-                        </td>
-
-                        <td className="px-5 py-4 text-sm text-slate-700">
-                          {purchase.quantity ?? "-"}
-                        </td>
-
-                        <td className="px-5 py-4 text-sm font-medium text-slate-900">
-                          ₹ {formatAmount(purchase.purchaseAmount)}
-                        </td>
-
-                        <td className="px-5 py-4 text-sm text-slate-700">
-                          {formatDate(purchase.purchaseDate)}
-                        </td>
-
-                        <td className="px-5 py-4">
-                          <StatusBadge status={purchase.status} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <p className="mt-4 text-sm text-slate-500">
+                Generating purchase report...
+              </p>
             </div>
           )}
-      </section>
-    </div>
+
+          {reportGenerated &&
+            !loadingReport &&
+            !reportFailed &&
+            reportData.length === 0 && (
+              <EmptyState
+                icon={FileX}
+                title="No Records Found"
+                description="No purchase records were found for the selected vendor and date range."
+                iconClassName="bg-slate-100 text-slate-500"
+              />
+            )}
+
+          {reportGenerated &&
+            !loadingReport &&
+            !reportFailed &&
+            reportData.length > 0 && (
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-slate-200/60">
+                <div className="flex flex-col gap-3 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                      <ReceiptText size={20} />
+                    </div>
+
+                    <div>
+                      <p className="font-semibold text-slate-900">
+                        Report Results
+                      </p>
+
+                      <p className="text-sm text-slate-500">
+                        {reportData.length} purchase record
+                        {reportData.length !== 1 ? "s" : ""} found
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[850px] text-left">
+                    <thead className="border-b border-slate-200 bg-slate-50">
+                      <tr>
+                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                          Purchase ID
+                        </th>
+
+                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                          Transaction ID
+                        </th>
+
+                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                          Vendor
+                        </th>
+
+                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                          Brand
+                        </th>
+
+                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                          Quantity
+                        </th>
+
+                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                          Amount
+                        </th>
+
+                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                          Purchase Date
+                        </th>
+
+                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody className="divide-y divide-slate-100">
+                      {reportData.map((purchase, index) => (
+                        <tr
+                          key={
+                            purchase.purchaseId ||
+                            purchase.transactionId ||
+                            index
+                          }
+                          className="transition hover:bg-slate-50"
+                        >
+                          <td className="px-5 py-4 text-sm font-medium text-slate-900">
+                            {purchase.purchaseId ?? "-"}
+                          </td>
+
+                          <td className="px-5 py-4 text-sm text-slate-600">
+                            {purchase.transactionId || "-"}
+                          </td>
+
+                          <td className="px-5 py-4 text-sm text-slate-700">
+                            {purchase.vendorName || "-"}
+                          </td>
+
+                          <td className="px-5 py-4 text-sm text-slate-700">
+                            {purchase.brandName || "-"}
+                          </td>
+
+                          <td className="px-5 py-4 text-sm text-slate-700">
+                            {purchase.quantity ?? "-"}
+                          </td>
+
+                          <td className="px-5 py-4 text-sm font-medium text-slate-900">
+                            ₹ {formatAmount(purchase.purchaseAmount)}
+                          </td>
+
+                          <td className="px-5 py-4 text-sm text-slate-700">
+                            {formatDate(purchase.purchaseDate)}
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <StatusBadge status={purchase.status} />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+        </section>
+      </div>
+    </>
   );
 }
 
