@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Building2,
   Boxes,
@@ -28,6 +29,8 @@ const initialFormData = {
 };
 
 function PurchaseEntry() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState(initialFormData);
 
   const [vendors, setVendors] = useState([]);
@@ -40,7 +43,6 @@ function PurchaseEntry() {
   const [submitting, setSubmitting] = useState(false);
 
   const [apiError, setApiError] = useState("");
-  const [submitResult, setSubmitResult] = useState(null);
   const [errors, setErrors] = useState({});
 
   /*
@@ -135,8 +137,6 @@ function PurchaseEntry() {
       ...previousErrors,
       [name]: "",
     }));
-
-    setSubmitResult(null);
   };
 
   const validateForm = () => {
@@ -165,7 +165,7 @@ function PurchaseEntry() {
     if (!formData.quantity) {
       newErrors.quantity = "Quantity is a required field.";
     } else if (!/^\d+$/.test(formData.quantity)) {
-      newErrors.quantity = "Please enter only numbers for Quantity.";
+      newErrors.quantity = "Please enter only whole numbers for Quantity.";
     }
 
     if (!formData.purchaseAmount) {
@@ -197,7 +197,6 @@ function PurchaseEntry() {
     try {
       setSubmitting(true);
       setApiError("");
-      setSubmitResult(null);
 
       const purchasePayload = {
         ...formData,
@@ -205,26 +204,16 @@ function PurchaseEntry() {
         purchaseAmount: Number(formData.purchaseAmount),
       };
 
-      const response = await addPurchaseDetail(purchasePayload);
+      await addPurchaseDetail(purchasePayload);
 
-      setSubmitResult({
-        type: "success",
-        message: response.message || "Purchase details added successfully.",
-      });
-
-      setFormData(initialFormData);
-      setMaterialTypes([]);
-      setUnits([]);
-      setErrors({});
+      navigate("/purchase/success");
     } catch (error) {
       console.error("Failed to add purchase:", error);
 
-      setSubmitResult({
-        type: "failure",
-        message:
-          error.response?.data?.message ||
+      setApiError(
+        error.response?.data?.message ||
           "Unable to add purchase details. Please try again.",
-      });
+      );
     } finally {
       setSubmitting(false);
     }
@@ -239,7 +228,6 @@ function PurchaseEntry() {
     setUnits([]);
     setErrors({});
     setApiError("");
-    setSubmitResult(null);
   };
 
   const inputClass =
@@ -270,43 +258,13 @@ function PurchaseEntry() {
         </p>
       </div>
 
-      {/* Submission Result */}
-      {submitResult && (
-        <div
-          className={`mb-6 flex items-start justify-between gap-4 rounded-xl border p-4 ${
-            submitResult.type === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-              : "border-red-200 bg-red-50 text-red-700"
-          }`}
-        >
-          <div>
-            <p className="font-semibold">
-              {submitResult.type === "success"
-                ? "Purchase Added Successfully"
-                : "Purchase Submission Failed"}
-            </p>
-
-            <p className="mt-1 text-sm">{submitResult.message}</p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setSubmitResult(null)}
-            className="text-lg font-semibold opacity-60 transition hover:opacity-100"
-            aria-label="Close notification"
-          >
-            ×
-          </button>
-        </div>
-      )}
-
       {/* API Error */}
       {apiError && (
         <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
           <AlertCircle size={20} className="mt-0.5 shrink-0" />
 
           <div>
-            <p className="font-semibold">Unable to load data</p>
+            <p className="font-semibold">Unable to complete the request</p>
 
             <p className="mt-1 text-sm">{apiError}</p>
           </div>
@@ -315,7 +273,7 @@ function PurchaseEntry() {
 
       {/* Initial Loading */}
       {loadingInitialData ? (
-        <div className="flex min-h-[400px] flex-col items-center justify-center">
+        <div className="flex min-h-100 flex-col items-center justify-center">
           <LoaderCircle size={32} className="animate-spin text-blue-600" />
 
           <p className="mt-4 text-sm text-slate-500">

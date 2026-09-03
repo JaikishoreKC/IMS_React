@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/layout/Navbar";
 import Home from "./pages/Home";
 import PurchaseEntry from "./pages/PurchaseEntry";
+import PurchaseSuccess from "./pages/PurchaseSuccess";
 import PurchaseReports from "./pages/PurchaseReports";
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/purchase" element={<PurchaseEntry />} />
+            <Route path="/purchase/success" element={<PurchaseSuccess />} />
             <Route path="/reports" element={<PurchaseReports />} />
           </Routes>
         </main>

@@ -1,23 +1,68 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  BarChart3,
   CalendarDays,
-  FileBarChart,
-  Search,
   RotateCcw,
+  Search,
   Building2,
-  PackageSearch,
+  LoaderCircle,
+  AlertCircle,
+  FileX,
+  ReceiptText,
 } from "lucide-react";
 
-function PurchaseReports() {
-  const [filters, setFilters] = useState({
-    vendorName: "",
-    fromDate: "",
-    toDate: "",
-  });
+import { getVendors, getPurchaseReport } from "../services/purchaseService";
 
-  const [errors, setErrors] = useState({});
+const initialFilters = {
+  vendorName: "",
+  fromDate: "",
+  toDate: "",
+};
+
+function PurchaseReports() {
+  const [filters, setFilters] = useState(initialFilters);
+
+  const [vendors, setVendors] = useState([]);
+  const [reportData, setReportData] = useState([]);
+
+  const [loadingVendors, setLoadingVendors] = useState(true);
+  const [loadingReport, setLoadingReport] = useState(false);
+
+  const [apiError, setApiError] = useState("");
+  const [validationError, setValidationError] = useState("");
+
   const [reportGenerated, setReportGenerated] = useState(false);
 
+  /*
+   * Load vendors when the page opens.
+   */
+  useEffect(() => {
+    const loadVendors = async () => {
+      try {
+        setLoadingVendors(true);
+        setApiError("");
+
+        const vendorData = await getVendors();
+
+        setVendors(vendorData || []);
+      } catch (error) {
+        console.error("Failed to load vendors:", error);
+
+        setApiError(
+          error.response?.data?.message ||
+            "Unable to load vendors. Please ensure the IMS backend is running.",
+        );
+      } finally {
+        setLoadingVendors(false);
+      }
+    };
+
+    loadVendors();
+  }, []);
+
+  /*
+   * Handle filter changes.
+   */
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -26,81 +71,129 @@ function PurchaseReports() {
       [name]: value,
     }));
 
-    setErrors((previousErrors) => ({
-      ...previousErrors,
-      [name]: "",
-    }));
+    setValidationError("");
+    setApiError("");
   };
 
+  /*
+   * Validate report filters.
+   */
   const validateFilters = () => {
-    const newErrors = {};
-
     if (!filters.vendorName) {
-      newErrors.vendorName = "Please select a vendor.";
+      setValidationError("Please select a vendor.");
+      return false;
     }
 
     if (!filters.fromDate) {
-      newErrors.fromDate = "Please select a start date.";
+      setValidationError("Please select a From Date.");
+      return false;
     }
 
     if (!filters.toDate) {
-      newErrors.toDate = "Please select an end date.";
+      setValidationError("Please select a To Date.");
+      return false;
     }
 
-    if (
-      filters.fromDate &&
-      filters.toDate &&
-      new Date(filters.fromDate) > new Date(filters.toDate)
-    ) {
-      newErrors.toDate =
-        "End date must be greater than or equal to the start date.";
+    if (new Date(filters.fromDate) > new Date(filters.toDate)) {
+      setValidationError("From Date cannot be later than To Date.");
+      return false;
     }
 
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
+    return true;
   };
 
-  const handleGenerateReport = (event) => {
+  /*
+   * Generate purchase report.
+   */
+  const handleGenerateReport = async (event) => {
     event.preventDefault();
+
+    setValidationError("");
+    setApiError("");
 
     if (!validateFilters()) {
       return;
     }
 
-    console.log("Report Filters:", filters);
+    try {
+      setLoadingReport(true);
+      setReportGenerated(false);
 
-    // API integration will happen later.
-    setReportGenerated(true);
+      const response = await getPurchaseReport(filters);
+
+      setReportData(response || []);
+      setReportGenerated(true);
+    } catch (error) {
+      console.error("Failed to generate purchase report:", error);
+
+      setReportData([]);
+
+      setApiError(
+        error.response?.data?.message ||
+          "Unable to load the purchase report. Please try again.",
+      );
+
+      setReportGenerated(true);
+    } finally {
+      setLoadingReport(false);
+    }
   };
 
+  /*
+   * Reset filters and report.
+   */
   const handleReset = () => {
-    setFilters({
-      vendorName: "",
-      fromDate: "",
-      toDate: "",
-    });
-
-    setErrors({});
+    setFilters(initialFilters);
+    setReportData([]);
     setReportGenerated(false);
+    setValidationError("");
+    setApiError("");
+  };
+
+  /*
+   * Format purchase date safely.
+   */
+  const formatDate = (dateValue) => {
+    if (!dateValue) {
+      return "-";
+    }
+
+    const date = new Date(dateValue);
+
+    if (Number.isNaN(date.getTime())) {
+      return dateValue;
+    }
+
+    return date.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  /*
+   * Format purchase amount.
+   */
+  const formatAmount = (amount) => {
+    if (amount === null || amount === undefined) {
+      return "-";
+    }
+
+    return Number(amount).toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   };
 
   const inputClass =
-    "mt-2 w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:ring-4";
-
-  const getInputClass = (fieldName) =>
-    `${inputClass} ${
-      errors[fieldName]
-        ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-        : "border-slate-200 focus:border-blue-500 focus:ring-blue-100"
-    }`;
+    "mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400";
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-7xl">
       {/* Page Header */}
       <div className="mb-8">
         <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
-          Reporting
+          Reporting & Analytics
         </p>
 
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
@@ -108,12 +201,28 @@ function PurchaseReports() {
         </h1>
 
         <p className="mt-2 text-slate-500">
-          View purchase transactions for a selected vendor within a specific
-          date range.
+          View purchase transactions by vendor and selected date range.
         </p>
       </div>
 
-      {/* Filter Section */}
+      {/* Error Message */}
+      {(apiError || validationError) && (
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+          <AlertCircle size={20} className="mt-0.5 shrink-0" />
+
+          <div>
+            <p className="font-semibold">
+              {validationError
+                ? "Please check the report filters"
+                : "Unable to generate report"}
+            </p>
+
+            <p className="mt-1 text-sm">{validationError || apiError}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Report Filters */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
@@ -124,22 +233,23 @@ function PurchaseReports() {
             <h2 className="font-semibold text-slate-900">Report Filters</h2>
 
             <p className="text-sm text-slate-500">
-              Select a vendor and purchase date range.
+              Select a vendor and date range to generate the report.
             </p>
           </div>
         </div>
 
         <form
           onSubmit={handleGenerateReport}
-          className="mt-6 grid gap-5 md:grid-cols-3"
+          className="mt-6 grid gap-5 lg:grid-cols-3"
         >
           {/* Vendor */}
           <div>
             <label
               htmlFor="vendorName"
-              className="text-sm font-medium text-slate-700"
+              className="flex items-center gap-2 text-sm font-medium text-slate-700"
             >
-              Vendor Name <span className="text-red-500">*</span>
+              <Building2 size={16} />
+              Vendor Name
             </label>
 
             <select
@@ -147,24 +257,29 @@ function PurchaseReports() {
               name="vendorName"
               value={filters.vendorName}
               onChange={handleChange}
-              className={getInputClass("vendorName")}
+              disabled={loadingVendors}
+              className={inputClass}
             >
-              <option value="">Select vendor</option>
-              <option value="demo">Vendor data will load from API</option>
-            </select>
+              <option value="">
+                {loadingVendors ? "Loading vendors..." : "Select vendor"}
+              </option>
 
-            {errors.vendorName && (
-              <p className="mt-2 text-sm text-red-600">{errors.vendorName}</p>
-            )}
+              {vendors.map((vendor) => (
+                <option key={vendor.vendorId} value={vendor.vendorName}>
+                  {vendor.vendorName}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* From Date */}
           <div>
             <label
               htmlFor="fromDate"
-              className="text-sm font-medium text-slate-700"
+              className="flex items-center gap-2 text-sm font-medium text-slate-700"
             >
-              From Date <span className="text-red-500">*</span>
+              <CalendarDays size={16} />
+              From Date
             </label>
 
             <input
@@ -173,21 +288,18 @@ function PurchaseReports() {
               type="date"
               value={filters.fromDate}
               onChange={handleChange}
-              className={getInputClass("fromDate")}
+              className={inputClass}
             />
-
-            {errors.fromDate && (
-              <p className="mt-2 text-sm text-red-600">{errors.fromDate}</p>
-            )}
           </div>
 
           {/* To Date */}
           <div>
             <label
               htmlFor="toDate"
-              className="text-sm font-medium text-slate-700"
+              className="flex items-center gap-2 text-sm font-medium text-slate-700"
             >
-              To Date <span className="text-red-500">*</span>
+              <CalendarDays size={16} />
+              To Date
             </label>
 
             <input
@@ -196,20 +308,17 @@ function PurchaseReports() {
               type="date"
               value={filters.toDate}
               onChange={handleChange}
-              className={getInputClass("toDate")}
+              className={inputClass}
             />
-
-            {errors.toDate && (
-              <p className="mt-2 text-sm text-red-600">{errors.toDate}</p>
-            )}
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-3 md:col-span-3 md:justify-end">
+          {/* Buttons */}
+          <div className="flex flex-col-reverse gap-3 lg:col-span-3 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={handleReset}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              disabled={loadingReport}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <RotateCcw size={17} />
               Reset
@@ -217,10 +326,20 @@ function PurchaseReports() {
 
             <button
               type="submit"
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+              disabled={loadingReport || loadingVendors}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              <FileBarChart size={17} />
-              Generate Report
+              {loadingReport ? (
+                <>
+                  <LoaderCircle size={17} className="animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <BarChart3 size={17} />
+                  Generate Report
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -228,28 +347,23 @@ function PurchaseReports() {
 
       {/* Report Results */}
       <section className="mt-8">
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-slate-900">
-              Purchase History
-            </h2>
+        <div className="mb-5">
+          <h2 className="text-xl font-bold text-slate-900">Purchase History</h2>
 
-            <p className="mt-1 text-sm text-slate-500">
-              Purchase transactions matching the selected filters will appear
-              here.
-            </p>
-          </div>
+          <p className="mt-1 text-sm text-slate-500">
+            Purchase records matching the selected report criteria.
+          </p>
         </div>
 
-        {!reportGenerated ? (
-          /* Initial Empty State */
+        {/* Initial State */}
+        {!reportGenerated && !loadingReport && (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
-              <PackageSearch size={26} />
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+              <BarChart3 size={30} />
             </div>
 
             <h3 className="mt-5 text-lg font-semibold text-slate-900">
-              No report generated yet
+              No Report Generated Yet
             </h3>
 
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
@@ -257,37 +371,174 @@ function PurchaseReports() {
               purchase transactions.
             </p>
           </div>
-        ) : (
-          /* Placeholder Result State */
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-212.5 text-left text-sm">
-                <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
-                  <tr>
-                    <th className="px-6 py-4 font-semibold">Purchase ID</th>
-                    <th className="px-6 py-4 font-semibold">Brand Name</th>
-                    <th className="px-6 py-4 font-semibold">Category</th>
-                    <th className="px-6 py-4 font-semibold">Material Type</th>
-                    <th className="px-6 py-4 font-semibold">Quantity</th>
-                    <th className="px-6 py-4 font-semibold">Amount</th>
-                    <th className="px-6 py-4 font-semibold">Purchase Date</th>
-                  </tr>
-                </thead>
+        )}
 
-                <tbody>
-                  <tr>
-                    <td
-                      colSpan="7"
-                      className="px-6 py-12 text-center text-slate-500"
-                    >
-                      Report data will be loaded from the IMS API.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+        {/* Loading State */}
+        {loadingReport && (
+          <div className="flex min-h-62.5 flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white">
+            <LoaderCircle size={32} className="animate-spin text-blue-600" />
+
+            <p className="mt-4 text-sm text-slate-500">
+              Generating purchase report...
+            </p>
           </div>
         )}
+
+        {/* No Records */}
+        {reportGenerated &&
+          !loadingReport &&
+          !apiError &&
+          reportData.length === 0 && (
+            <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
+                <FileX size={30} />
+              </div>
+
+              <h3 className="mt-5 text-lg font-semibold text-slate-900">
+                No Records Found
+              </h3>
+
+              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+                No purchase records were found for the selected vendor and date
+                range.
+              </p>
+            </div>
+          )}
+
+        {/* Report Table */}
+        {reportGenerated &&
+          !loadingReport &&
+          !apiError &&
+          reportData.length > 0 && (
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="flex flex-col gap-3 border-b border-slate-200 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                    <ReceiptText size={20} />
+                  </div>
+
+                  <div>
+                    <p className="font-semibold text-slate-900">
+                      Report Results
+                    </p>
+
+                    <p className="text-sm text-slate-500">
+                      {reportData.length} purchase record
+                      {reportData.length !== 1 ? "s" : ""} found
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-250 text-left">
+                  <thead className="border-b border-slate-200 bg-slate-50">
+                    <tr>
+                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Purchase ID
+                      </th>
+
+                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Transaction ID
+                      </th>
+
+                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Vendor
+                      </th>
+
+                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Brand
+                      </th>
+
+                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Category
+                      </th>
+
+                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Material Type
+                      </th>
+
+                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Quantity
+                      </th>
+
+                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Amount
+                      </th>
+
+                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Purchase Date
+                      </th>
+
+                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="divide-y divide-slate-100">
+                    {reportData.map((purchase, index) => (
+                      <tr
+                        key={
+                          purchase.purchaseId || purchase.transactionId || index
+                        }
+                        className="transition hover:bg-slate-50"
+                      >
+                        <td className="px-5 py-4 text-sm font-medium text-slate-900">
+                          {purchase.purchaseId ?? "-"}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm text-slate-600">
+                          {purchase.transactionId || "-"}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm text-slate-700">
+                          {purchase.vendorName || "-"}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm text-slate-700">
+                          {purchase.brandName || "-"}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm text-slate-700">
+                          {purchase.materialCategoryName || "-"}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm text-slate-700">
+                          {purchase.materialTypeName || "-"}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm text-slate-700">
+                          {purchase.quantity ?? "-"}{" "}
+                          {purchase.materialUnitName || ""}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm font-medium text-slate-900">
+                          ₹ {formatAmount(purchase.purchaseAmount)}
+                        </td>
+
+                        <td className="px-5 py-4 text-sm text-slate-700">
+                          {formatDate(purchase.purchaseDate)}
+                        </td>
+
+                        <td className="px-5 py-4">
+                          <span
+                            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                              purchase.status === "SUCCESS"
+                                ? "bg-emerald-50 text-emerald-700"
+                                : "bg-slate-100 text-slate-700"
+                            }`}
+                          >
+                            {purchase.status || "-"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
       </section>
     </div>
   );
