@@ -33,9 +33,6 @@ function PurchaseReports() {
 
   const [reportGenerated, setReportGenerated] = useState(false);
 
-  /*
-   * Load vendors when the page opens.
-   */
   useEffect(() => {
     const loadVendors = async () => {
       try {
@@ -60,9 +57,6 @@ function PurchaseReports() {
     loadVendors();
   }, []);
 
-  /*
-   * Handle filter changes.
-   */
   const handleChange = (event) => {
     const { name, value } = event.target;
 
@@ -75,9 +69,6 @@ function PurchaseReports() {
     setApiError("");
   };
 
-  /*
-   * Validate report filters.
-   */
   const validateFilters = () => {
     if (!filters.vendorName) {
       setValidationError("Please select a vendor.");
@@ -102,9 +93,6 @@ function PurchaseReports() {
     return true;
   };
 
-  /*
-   * Generate purchase report.
-   */
   const handleGenerateReport = async (event) => {
     event.preventDefault();
 
@@ -139,9 +127,6 @@ function PurchaseReports() {
     }
   };
 
-  /*
-   * Reset filters and report.
-   */
   const handleReset = () => {
     setFilters(initialFilters);
     setReportData([]);
@@ -150,9 +135,6 @@ function PurchaseReports() {
     setApiError("");
   };
 
-  /*
-   * Format purchase date safely.
-   */
   const formatDate = (dateValue) => {
     if (!dateValue) {
       return "-";
@@ -171,9 +153,6 @@ function PurchaseReports() {
     });
   };
 
-  /*
-   * Format purchase amount.
-   */
   const formatAmount = (amount) => {
     if (amount === null || amount === undefined) {
       return "-";
@@ -375,7 +354,7 @@ function PurchaseReports() {
 
         {/* Loading State */}
         {loadingReport && (
-          <div className="flex min-h-62.5 flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white">
+          <div className="flex min-h-[250px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white">
             <LoaderCircle size={32} className="animate-spin text-blue-600" />
 
             <p className="mt-4 text-sm text-slate-500">
@@ -431,7 +410,7 @@ function PurchaseReports() {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full min-w-250 text-left">
+                <table className="w-full min-w-[850px] text-left">
                   <thead className="border-b border-slate-200 bg-slate-50">
                     <tr>
                       <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -448,14 +427,6 @@ function PurchaseReports() {
 
                       <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
                         Brand
-                      </th>
-
-                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Category
-                      </th>
-
-                      <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Material Type
                       </th>
 
                       <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -501,16 +472,7 @@ function PurchaseReports() {
                         </td>
 
                         <td className="px-5 py-4 text-sm text-slate-700">
-                          {purchase.materialCategoryName || "-"}
-                        </td>
-
-                        <td className="px-5 py-4 text-sm text-slate-700">
-                          {purchase.materialTypeName || "-"}
-                        </td>
-
-                        <td className="px-5 py-4 text-sm text-slate-700">
-                          {purchase.quantity ?? "-"}{" "}
-                          {purchase.materialUnitName || ""}
+                          {purchase.quantity ?? "-"}
                         </td>
 
                         <td className="px-5 py-4 text-sm font-medium text-slate-900">
@@ -526,7 +488,9 @@ function PurchaseReports() {
                             className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
                               purchase.status === "SUCCESS"
                                 ? "bg-emerald-50 text-emerald-700"
-                                : "bg-slate-100 text-slate-700"
+                                : purchase.status === "Pending"
+                                  ? "bg-amber-50 text-amber-700"
+                                  : "bg-slate-100 text-slate-700"
                             }`}
                           >
                             {purchase.status || "-"}
