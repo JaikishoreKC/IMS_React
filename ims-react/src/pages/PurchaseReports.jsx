@@ -242,6 +242,49 @@ function PurchaseReports() {
     });
   };
 
+  const columns = [
+    {
+      header: "Purchase ID",
+      className: "px-5 py-4 text-sm font-medium text-slate-900",
+      render: (purchase) => purchase.purchaseId ?? "-",
+    },
+    {
+      header: "Transaction ID",
+      className: "px-5 py-4 text-sm text-slate-600",
+      render: (purchase) => purchase.transactionId || "-",
+    },
+    {
+      header: "Vendor",
+      className: "px-5 py-4 text-sm text-slate-700",
+      render: (purchase) => purchase.vendorName || "-",
+    },
+    {
+      header: "Brand",
+      className: "px-5 py-4 text-sm text-slate-700",
+      render: (purchase) => purchase.brandName || "-",
+    },
+    {
+      header: "Quantity",
+      className: "px-5 py-4 text-sm text-slate-700",
+      render: (purchase) => purchase.quantity ?? "-",
+    },
+    {
+      header: "Amount",
+      className: "px-5 py-4 text-sm font-medium text-slate-900",
+      render: (purchase) => `₹ ${formatAmount(purchase.purchaseAmount)}`,
+    },
+    {
+      header: "Purchase Date",
+      className: "px-5 py-4 text-sm text-slate-700",
+      render: (purchase) => formatDate(purchase.purchaseDate),
+    },
+    {
+      header: "Status",
+      className: "px-5 py-4",
+      render: (purchase) => <StatusBadge status={purchase.status} />,
+    },
+  ];
+
   const inputClass =
     "mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400";
 
@@ -417,7 +460,7 @@ function PurchaseReports() {
           )}
 
           {loadingReport && (
-            <div className="flex min-h-[250px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white">
+            <div className="flex min-h-62.5 flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white">
               <LoaderCircle size={32} className="animate-spin text-blue-600" />
 
               <p className="mt-4 text-sm text-slate-500">
@@ -463,40 +506,17 @@ function PurchaseReports() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[850px] text-left">
+                  <table className="w-full min-w-212.5 text-left">
                     <thead className="border-b border-slate-200 bg-slate-50">
                       <tr>
-                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                          Purchase ID
-                        </th>
-
-                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                          Transaction ID
-                        </th>
-
-                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                          Vendor
-                        </th>
-
-                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                          Brand
-                        </th>
-
-                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                          Quantity
-                        </th>
-
-                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                          Amount
-                        </th>
-
-                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                          Purchase Date
-                        </th>
-
-                        <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                          Status
-                        </th>
+                        {columns.map((column) => (
+                          <th
+                            key={column.header}
+                            className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500"
+                          >
+                            {column.header}
+                          </th>
+                        ))}
                       </tr>
                     </thead>
 
@@ -510,37 +530,14 @@ function PurchaseReports() {
                           }
                           className="transition hover:bg-slate-50"
                         >
-                          <td className="px-5 py-4 text-sm font-medium text-slate-900">
-                            {purchase.purchaseId ?? "-"}
-                          </td>
-
-                          <td className="px-5 py-4 text-sm text-slate-600">
-                            {purchase.transactionId || "-"}
-                          </td>
-
-                          <td className="px-5 py-4 text-sm text-slate-700">
-                            {purchase.vendorName || "-"}
-                          </td>
-
-                          <td className="px-5 py-4 text-sm text-slate-700">
-                            {purchase.brandName || "-"}
-                          </td>
-
-                          <td className="px-5 py-4 text-sm text-slate-700">
-                            {purchase.quantity ?? "-"}
-                          </td>
-
-                          <td className="px-5 py-4 text-sm font-medium text-slate-900">
-                            ₹ {formatAmount(purchase.purchaseAmount)}
-                          </td>
-
-                          <td className="px-5 py-4 text-sm text-slate-700">
-                            {formatDate(purchase.purchaseDate)}
-                          </td>
-
-                          <td className="px-5 py-4">
-                            <StatusBadge status={purchase.status} />
-                          </td>
+                          {columns.map((column) => (
+                            <td
+                              key={column.header}
+                              className={column.className}
+                            >
+                              {column.render(purchase)}
+                            </td>
+                          ))}
                         </tr>
                       ))}
                     </tbody>

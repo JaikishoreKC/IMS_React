@@ -4,7 +4,6 @@ import {
   ClipboardPlus,
   FileBarChart,
   Layers3,
-  PackageCheck,
   Workflow,
 } from "lucide-react";
 
@@ -16,10 +15,6 @@ function Home() {
         <div className="absolute bottom-0 right-1/3 h-40 w-40 rounded-full bg-teal-100/70 blur-3xl" />
         <div className="relative flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
           <div className="max-w-2xl">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
-              <PackageCheck size={14} />
-              Procurement workspace
-            </div>
             <h1 className="max-w-xl text-3xl font-bold tracking-tight sm:text-5xl">
               Inventory decisions, kept simple.
             </h1>
