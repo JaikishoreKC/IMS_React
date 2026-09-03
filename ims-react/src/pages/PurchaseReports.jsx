@@ -169,28 +169,28 @@ function PurchaseReports() {
   };
 
   const inputClass =
-    "mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400";
+    "mt-2 w-full rounded-xl border border-white/10 bg-[#0b1224] px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:bg-slate-900 disabled:text-slate-600";
 
   return (
     <div className="mx-auto max-w-7xl">
       {/* Page Header */}
       <div className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
+        <p className="text-sm font-semibold uppercase tracking-wider text-blue-300">
           Reporting & Analytics
         </p>
 
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">
           Purchase Reports
         </h1>
 
-        <p className="mt-2 text-slate-500">
+        <p className="mt-2 text-slate-400">
           View purchase transactions by vendor and selected date range.
         </p>
       </div>
 
       {/* Error Message */}
       {(apiError || validationError) && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-400/20 bg-red-500/10 p-4 text-red-200">
           <AlertCircle size={20} className="mt-0.5 shrink-0" />
 
           <div>
@@ -206,16 +206,16 @@ function PurchaseReports() {
       )}
 
       {/* Report Filters */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-white/10 bg-[#0d1427] p-6 shadow-xl shadow-black/10">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
             <Search size={20} />
           </div>
 
           <div>
-            <h2 className="font-semibold text-slate-900">Report Filters</h2>
+            <h2 className="font-semibold text-white">Report Filters</h2>
 
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-400">
               Select a vendor and date range to generate the report.
             </p>
           </div>
@@ -229,7 +229,7 @@ function PurchaseReports() {
           <div>
             <label
               htmlFor="vendorName"
-              className="flex items-center gap-2 text-sm font-medium text-slate-700"
+              className="flex items-center gap-2 text-sm font-medium text-slate-300"
             >
               <Building2 size={16} />
               Vendor Name
@@ -259,7 +259,7 @@ function PurchaseReports() {
           <div>
             <label
               htmlFor="fromDate"
-              className="flex items-center gap-2 text-sm font-medium text-slate-700"
+              className="flex items-center gap-2 text-sm font-medium text-slate-300"
             >
               <CalendarDays size={16} />
               From Date
@@ -279,7 +279,7 @@ function PurchaseReports() {
           <div>
             <label
               htmlFor="toDate"
-              className="flex items-center gap-2 text-sm font-medium text-slate-700"
+              className="flex items-center gap-2 text-sm font-medium text-slate-300"
             >
               <CalendarDays size={16} />
               To Date
@@ -301,7 +301,7 @@ function PurchaseReports() {
               type="button"
               onClick={handleReset}
               disabled={loadingReport}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <RotateCcw size={17} />
               Reset
@@ -310,7 +310,7 @@ function PurchaseReports() {
             <button
               type="submit"
               disabled={loadingReport || loadingVendors}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-950/40 transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {loadingReport ? (
                 <>
@@ -329,31 +329,31 @@ function PurchaseReports() {
       </section>
 
       {selectedVendor && (
-        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="mt-6 rounded-2xl border border-white/10 bg-[#0d1427] p-6 shadow-xl shadow-black/10">
           <div className="grid gap-5 sm:grid-cols-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <p className="text-xs font-semibold uppercase tracking-wider text-blue-300">
                 Address
               </p>
-              <p className="mt-1 text-sm text-slate-700">
+              <p className="mt-1 text-sm text-slate-300">
                 {selectedVendor.vendorAddress || "-"}
               </p>
             </div>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <p className="text-xs font-semibold uppercase tracking-wider text-blue-300">
                 Contact Number
               </p>
-              <p className="mt-1 text-sm text-slate-700">
+              <p className="mt-1 text-sm text-slate-300">
                 {selectedVendor.contactNumber || "-"}
               </p>
             </div>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <p className="text-xs font-semibold uppercase tracking-wider text-blue-300">
                 Contact Person
               </p>
-              <p className="mt-1 text-sm text-slate-700">
+              <p className="mt-1 text-sm text-slate-300">
                 {selectedVendor.contactPerson || "-"}
               </p>
             </div>
@@ -364,9 +364,9 @@ function PurchaseReports() {
       {/* Report Results */}
       <section className="mt-8">
         <div className="mb-5">
-          <h2 className="text-xl font-bold text-slate-900">Purchase History</h2>
+          <h2 className="text-xl font-bold text-white">Purchase History</h2>
 
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-400">
             Purchase records matching the selected report criteria.
           </p>
         </div>

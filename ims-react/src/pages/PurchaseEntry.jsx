@@ -233,28 +233,28 @@ function PurchaseEntry() {
   };
 
   const inputClass =
-    "mt-2 w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-4 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400";
+    "mt-2 w-full rounded-xl border bg-[#0b1224] px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:ring-4 disabled:cursor-not-allowed disabled:bg-slate-900 disabled:text-slate-600";
 
   const getInputClass = (fieldName) =>
     `${inputClass} ${
       errors[fieldName]
         ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-        : "border-slate-200 focus:border-blue-500 focus:ring-blue-100"
+        : "border-white/10 focus:border-blue-400 focus:ring-blue-500/10"
     }`;
 
   return (
     <div className="mx-auto max-w-5xl">
       {/* Page Header */}
       <div className="mb-8">
-        <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
+        <p className="text-sm font-semibold uppercase tracking-wider text-blue-300">
           Purchase Management
         </p>
 
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">
           Add Purchase Detail
         </h1>
 
-        <p className="mt-2 text-slate-500">
+        <p className="mt-2 text-slate-400">
           Enter the vendor, material, and purchase information to record a new
           purchase.
         </p>
@@ -262,7 +262,7 @@ function PurchaseEntry() {
 
       {/* API Error */}
       {apiError && (
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-400/20 bg-red-500/10 p-4 text-red-200">
           <AlertCircle size={20} className="mt-0.5 shrink-0" />
 
           <div>
@@ -285,18 +285,16 @@ function PurchaseEntry() {
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Vendor Information */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="rounded-2xl border border-white/10 bg-[#0d1427] p-6 shadow-xl shadow-black/10">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
                 <Building2 size={20} />
               </div>
 
               <div>
-                <h2 className="font-semibold text-slate-900">
-                  Vendor Information
-                </h2>
+                <h2 className="font-semibold text-white">Vendor Information</h2>
 
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-slate-400">
                   Select the vendor for this purchase.
                 </p>
               </div>
@@ -305,7 +303,7 @@ function PurchaseEntry() {
             <div className="mt-6">
               <label
                 htmlFor="vendorName"
-                className="text-sm font-medium text-slate-700"
+                className="text-sm font-medium text-slate-300"
               >
                 Vendor Name <span className="text-red-500">*</span>
               </label>
@@ -333,18 +331,18 @@ function PurchaseEntry() {
           </section>
 
           {/* Material Information */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="rounded-2xl border border-white/10 bg-[#0d1427] p-6 shadow-xl shadow-black/10">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                 <Boxes size={20} />
               </div>
 
               <div>
-                <h2 className="font-semibold text-slate-900">
+                <h2 className="font-semibold text-white">
                   Material Information
                 </h2>
 
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-slate-400">
                   Select the material category, type, and unit.
                 </p>
               </div>
@@ -355,7 +353,7 @@ function PurchaseEntry() {
               <div>
                 <label
                   htmlFor="materialCategoryId"
-                  className="text-sm font-medium text-slate-700"
+                  className="text-sm font-medium text-slate-300"
                 >
                   Material Category <span className="text-red-500">*</span>
                 </label>
@@ -390,7 +388,7 @@ function PurchaseEntry() {
               <div>
                 <label
                   htmlFor="materialTypeId"
-                  className="text-sm font-medium text-slate-700"
+                  className="text-sm font-medium text-slate-300"
                 >
                   Material Type <span className="text-red-500">*</span>
                 </label>
@@ -430,7 +428,7 @@ function PurchaseEntry() {
               <div>
                 <label
                   htmlFor="unitId"
-                  className="text-sm font-medium text-slate-700"
+                  className="text-sm font-medium text-slate-300"
                 >
                   Unit <span className="text-red-500">*</span>
                 </label>
@@ -462,18 +460,16 @@ function PurchaseEntry() {
           </section>
 
           {/* Purchase Details */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="rounded-2xl border border-white/10 bg-[#0d1427] p-6 shadow-xl shadow-black/10">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
                 <ClipboardList size={20} />
               </div>
 
               <div>
-                <h2 className="font-semibold text-slate-900">
-                  Purchase Details
-                </h2>
+                <h2 className="font-semibold text-white">Purchase Details</h2>
 
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-slate-400">
                   Enter the details of the material purchase.
                 </p>
               </div>
@@ -484,7 +480,7 @@ function PurchaseEntry() {
               <div>
                 <label
                   htmlFor="brandName"
-                  className="text-sm font-medium text-slate-700"
+                  className="text-sm font-medium text-slate-300"
                 >
                   Brand Name <span className="text-red-500">*</span>
                 </label>
@@ -510,7 +506,7 @@ function PurchaseEntry() {
               <div>
                 <label
                   htmlFor="quantity"
-                  className="text-sm font-medium text-slate-700"
+                  className="text-sm font-medium text-slate-300"
                 >
                   Quantity <span className="text-red-500">*</span>
                 </label>
@@ -535,7 +531,7 @@ function PurchaseEntry() {
               <div>
                 <label
                   htmlFor="purchaseAmount"
-                  className="text-sm font-medium text-slate-700"
+                  className="text-sm font-medium text-slate-300"
                 >
                   Purchase Amount <span className="text-red-500">*</span>
                 </label>
@@ -562,7 +558,7 @@ function PurchaseEntry() {
               <div>
                 <label
                   htmlFor="purchaseDate"
-                  className="text-sm font-medium text-slate-700"
+                  className="text-sm font-medium text-slate-300"
                 >
                   Purchase Date <span className="text-red-500">*</span>
                 </label>
@@ -586,12 +582,12 @@ function PurchaseEntry() {
           </section>
 
           {/* Action Buttons */}
-          <div className="flex flex-col-reverse justify-end gap-3 border-t border-slate-200 pt-6 sm:flex-row">
+          <div className="flex flex-col-reverse justify-end gap-3 border-t border-white/10 pt-6 sm:flex-row">
             <button
               type="button"
               onClick={handleReset}
               disabled={submitting}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-slate-300 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <RotateCcw size={17} />
               Reset
@@ -600,7 +596,7 @@ function PurchaseEntry() {
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-950/40 transition hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {submitting ? (
                 <>

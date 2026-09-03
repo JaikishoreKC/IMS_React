@@ -3,140 +3,94 @@ import {
   ArrowRight,
   ClipboardPlus,
   FileBarChart,
+  Layers3,
   PackageCheck,
+  Workflow,
 } from "lucide-react";
 
 function Home() {
   return (
-    <div className="space-y-10">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-3xl bg-slate-900 px-8 py-14 text-white shadow-lg sm:px-12">
-        {/* Decorative background elements */}
-        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
-        <div className="absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-indigo-500/20 blur-3xl" />
-
-        <div className="relative max-w-2xl">
-          <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20">
-            <PackageCheck size={28} />
+    <div className="space-y-8">
+      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#121b3a] via-[#17143d] to-[#10172a] px-6 py-8 text-white shadow-2xl shadow-black/20 sm:px-10 sm:py-10">
+        <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full bg-blue-500/15 blur-3xl" />
+        <div className="absolute bottom-0 right-1/3 h-40 w-40 rounded-full bg-violet-500/10 blur-3xl" />
+        <div className="relative flex flex-col justify-between gap-8 lg:flex-row lg:items-end">
+          <div className="max-w-2xl">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-300/20 bg-blue-300/10 px-3 py-1.5 text-xs font-semibold text-blue-200">
+              <PackageCheck size={14} />
+              Procurement workspace
+            </div>
+            <h1 className="max-w-xl text-3xl font-bold tracking-tight sm:text-5xl">
+              Inventory decisions, kept simple.
+            </h1>
+            <p className="mt-4 max-w-xl text-sm leading-6 text-slate-300 sm:text-base">
+              Record material purchases, connect vendor and material services,
+              and inspect transaction history from one focused workspace.
+            </p>
           </div>
-
-          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-slate-300">
-            Inventory Management System
-          </p>
-
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            Manage purchases with clarity and confidence.
-          </h1>
-
-          <p className="mt-5 max-w-xl text-base leading-7 text-slate-300 sm:text-lg">
-            Record material purchases, manage vendor transactions, and access
-            purchase reports from one streamlined application.
-          </p>
-
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3">
             <Link
               to="/purchase"
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+              className="inline-flex items-center gap-2 rounded-xl bg-blue-500 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-950/40 transition hover:bg-blue-400"
             >
-              Add Purchase
-              <ArrowRight size={17} />
+              <ClipboardPlus size={17} />
+              Add purchase
+              <ArrowRight size={16} />
             </Link>
-
             <Link
               to="/reports"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-bold text-slate-100 transition hover:bg-white/10"
             >
-              View Reports
               <FileBarChart size={17} />
+              View reports
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Quick Actions */}
-      <section>
-        <div className="mb-6">
-          <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">
-            Quick Actions
+      <section className="grid gap-5 md:grid-cols-3">
+        <div className="rounded-2xl border border-white/10 bg-[#0d1427]/85 p-5 shadow-xl shadow-black/10">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/15 text-blue-300">
+            <ClipboardPlus size={19} />
+          </div>
+          <p className="mt-5 text-xs font-bold uppercase tracking-widest text-blue-300">
+            01 / Entry
           </p>
-
-          <h2 className="mt-2 text-2xl font-bold text-slate-900">
-            What would you like to do?
+          <h2 className="mt-2 text-lg font-bold text-white">
+            Record purchases
           </h2>
-
-          <p className="mt-2 text-slate-500">
-            Choose an action to continue managing your inventory purchases.
+          <p className="mt-2 text-sm leading-6 text-slate-400">
+            Capture vendor, material, quantity, amount, and date details.
           </p>
         </div>
-
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Add Purchase Card */}
-          <Link
-            to="/purchase"
-            className="group rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg"
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                <ClipboardPlus size={24} />
-              </div>
-
-              <ArrowRight
-                size={20}
-                className="text-slate-400 transition group-hover:translate-x-1 group-hover:text-blue-600"
-              />
-            </div>
-
-            <h3 className="mt-6 text-xl font-bold text-slate-900">
-              Add Purchase Detail
-            </h3>
-
-            <p className="mt-2 leading-6 text-slate-500">
-              Record a new material purchase by selecting a vendor, material
-              details, quantity, amount, and purchase date.
-            </p>
-
-            <div className="mt-6 text-sm font-semibold text-blue-600">
-              Create Purchase →
-            </div>
-          </Link>
-
-          {/* Reports Card */}
-          <Link
-            to="/reports"
-            className="group rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg"
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                <FileBarChart size={24} />
-              </div>
-
-              <ArrowRight
-                size={20}
-                className="text-slate-400 transition group-hover:translate-x-1 group-hover:text-indigo-600"
-              />
-            </div>
-
-            <h3 className="mt-6 text-xl font-bold text-slate-900">
-              Purchase Reports
-            </h3>
-
-            <p className="mt-2 leading-6 text-slate-500">
-              View purchase transactions for a selected vendor within a
-              specific date range.
-            </p>
-
-            <div className="mt-6 text-sm font-semibold text-indigo-600">
-              View Reports →
-            </div>
-          </Link>
+        <div className="rounded-2xl border border-white/10 bg-[#0d1427]/85 p-5 shadow-xl shadow-black/10">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
+            <Layers3 size={19} />
+          </div>
+          <p className="mt-5 text-xs font-bold uppercase tracking-widest text-violet-300">
+            02 / Connect
+          </p>
+          <h2 className="mt-2 text-lg font-bold text-white">
+            Use live references
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-400">
+            Choose vendors and category-specific materials from connected
+            services.
+          </p>
         </div>
-      </section>
-
-      {/* Footer Info */}
-      <section className="rounded-2xl border border-slate-200 bg-white px-6 py-5">
-        <p className="text-center text-sm text-slate-500">
-          Inventory Management System · Material Purchase Management
-        </p>
+        <div className="rounded-2xl border border-white/10 bg-[#0d1427]/85 p-5 shadow-xl shadow-black/10">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-300">
+            <Workflow size={19} />
+          </div>
+          <p className="mt-5 text-xs font-bold uppercase tracking-widest text-emerald-300">
+            03 / Review
+          </p>
+          <h2 className="mt-2 text-lg font-bold text-white">Inspect history</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-400">
+            Filter purchase records by vendor and date range when you need
+            context.
+          </p>
+        </div>
       </section>
     </div>
   );

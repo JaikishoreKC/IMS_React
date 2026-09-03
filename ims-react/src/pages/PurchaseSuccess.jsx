@@ -5,6 +5,34 @@ function PurchaseSuccess() {
   const { state } = useLocation();
   const purchase = state?.purchase;
 
+  if (!purchase) {
+    return (
+      <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center">
+        <div className="w-full max-w-xl rounded-3xl border border-white/10 bg-[#0d1427] p-8 text-center shadow-2xl sm:p-12">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-amber-400/10 text-amber-300">
+            <FileBarChart size={38} />
+          </div>
+          <p className="mt-7 text-xs font-bold uppercase tracking-[0.2em] text-amber-300">
+            No purchase result
+          </p>
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">
+            Purchase details are unavailable
+          </h1>
+          <p className="mx-auto mt-4 max-w-md leading-7 text-slate-400">
+            This page is available after a purchase is submitted successfully.
+          </p>
+          <Link
+            to="/purchase"
+            className="mt-8 inline-flex items-center gap-2 rounded-xl bg-blue-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-blue-400"
+          >
+            <ClipboardPlus size={17} />
+            Go to purchase entry
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center">
       <div className="w-full max-w-xl rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm sm:p-12">
