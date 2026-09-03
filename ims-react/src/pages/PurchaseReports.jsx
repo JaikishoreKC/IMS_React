@@ -135,6 +135,10 @@ function PurchaseReports() {
     setApiError("");
   };
 
+  const selectedVendor = vendors.find(
+    (vendor) => vendor.vendorName === filters.vendorName,
+  );
+
   const formatDate = (dateValue) => {
     if (!dateValue) {
       return "-";
@@ -323,6 +327,39 @@ function PurchaseReports() {
           </div>
         </form>
       </section>
+
+      {selectedVendor && (
+        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="grid gap-5 sm:grid-cols-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Address
+              </p>
+              <p className="mt-1 text-sm text-slate-700">
+                {selectedVendor.vendorAddress || "-"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Contact Number
+              </p>
+              <p className="mt-1 text-sm text-slate-700">
+                {selectedVendor.contactNumber || "-"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Contact Person
+              </p>
+              <p className="mt-1 text-sm text-slate-700">
+                {selectedVendor.contactPerson || "-"}
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Report Results */}
       <section className="mt-8">

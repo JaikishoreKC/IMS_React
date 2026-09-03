@@ -204,9 +204,11 @@ function PurchaseEntry() {
         purchaseAmount: Number(formData.purchaseAmount),
       };
 
-      await addPurchaseDetail(purchasePayload);
+      const response = await addPurchaseDetail(purchasePayload);
 
-      navigate("/purchase/success");
+      navigate("/purchase/success", {
+        state: { purchase: response?.purchase || response },
+      });
     } catch (error) {
       console.error("Failed to add purchase:", error);
 
